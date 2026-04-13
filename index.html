@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Open When 💌</title>
+
+  <!-- Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #ffe4e6, #fef3c7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #444;
+      font-size: 22px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+      max-width: 500px;
+    }
+
+    @media (min-width: 600px) {
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .card {
+      background: white;
+      border-radius: 18px;
+      padding: 18px 10px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.15s;
+      min-height: 90px;
+    }
+
+    .card:active {
+      transform: scale(0.96);
+    }
+
+    .icon {
+      font-size: 26px;
+    }
+
+    .trigger {
+      font-size: 13px;
+      margin-top: 6px;
+      color: #666;
+    }
+
+    /* Popup */
+    .popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+    }
+
+    .popup-content {
+      background: white;
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .message {
+      margin: 15px 0;
+      font-size: 14px;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    .close-btn {
+      position: sticky;
+      bottom: 0;
+      background: #ff6b81;
+      border: none;
+      color: white;
+      padding: 12px;
+      width: 100%;
+      border-radius: 12px;
+      font-size: 15px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>💌 Open When...</h1>
+
+  <div class="grid" id="cardContainer"></div>
+
+  <div class="popup" id="popup">
+    <div class="popup-content">
+      <div id="popupIcon" class="icon"></div>
+      <h3 id="popupTitle"></h3>
+      <p id="popupMessage" class="message"></p>
+      <p id="popupClosing"></p>
+      <button class="close-btn" onclick="closePopup()">Close</button>
+    </div>
+  </div>
+
+  <script>
+    const cards = [/* YOUR SAME CARDS (unchanged) */ 
+    {
+      trigger: "you wake up on your birthday 🎂",
+      icon: "🎂",
+      message: `Good morning, birthday boy! Today is YOUR day — the universe decided to put you in it, and I will forever be grateful for that. You deserve all the love, all the cake, and all the happiness this day can hold. I hope every moment feels as special as you make me feel every single day. Happy Birthday, my love.`,
+      closing: "Yours always, with so much love"
+    },
+    {
+      trigger: "you miss me 💌",
+      icon: "💌",
+      message: `If you're reading this, it means you thought of me — and just so you know, I'm thinking of you too, always. Distance is just a number, and my heart has no idea what distance even means. Close your eyes, take a breath, and know that I am right there with you. I can't wait to see your face again.`,
+      closing: "Missing you right back"
+    },
+    {
+      trigger: "you need a confidence boost ⭐",
+      icon: "⭐",
+      message: `Hey you — yes, YOU. The one reading this right now. You are brilliant, capable, and so incredibly strong. You have overcome every single hard thing life has thrown at you so far. Whatever challenge is in front of you now? You've got it. I believe in you more than you know. Go show the world what you're made of.`,
+      closing: "Your biggest fan"
+    },
+    {
+      trigger: "you're having a bad day 🌧️",
+      icon: "🌧️",
+      message: `Bad days happen to even the best people — and you are one of the best. Whatever went wrong today, please know it does not define you. You are allowed to feel it, sit with it, and let it pass. Tomorrow will be kinder. And through every storm, I am always your shelter. Lean on me whenever you need to.`,
+      closing: "Here for every kind of day"
+    },
+    {
+      trigger: "you can't sleep 🌙",
+      icon: "🌙",
+      message: `Nights can be loud sometimes, even in silence. If your mind won't quiet down, let me fill it with something good instead: I love the way your eyes light up when you laugh. I love how passionate you get about the things you care about. I love every little thing about you. Now close your eyes and let that settle in. Sleep well, my love.`,
+      closing: "Dreaming of you"
+    },
+    {
+      trigger: "you need to smile 😄",
+      icon: "😄",
+      message: `Consider this your official reminder: your smile is one of my favorite things in the entire world. It lights up every room. It lights up ME. So if you need a reason to smile right now — I love you. There. Did it work? If not, just imagine me doing my terrible dance moves. That should do the trick.`,
+      closing: "Smiling just thinking about you"
+    },
+    {
+      trigger: "you feel like giving up 🔥",
+      icon: "🔥",
+      message: `Stop. Breathe. Don't you dare give up. I know it feels impossible right now, but you have come so far — further than you give yourself credit for. Every great thing is built through the hardest moments. You are not at the end. You are right in the middle of your story, and it is going to be incredible. Keep going. I'll be cheering every step of the way.`,
+      closing: "Never stopping believing in you"
+    },
+    {
+      trigger: "you want to know why I love you ❤️",
+      icon: "❤️",
+      message: `Where do I even begin? I love you because of the way you care so deeply about the people in your life. I love your honesty, your humor, and your heart. I love the way you make ordinary moments feel extraordinary. I love who I am when I'm with you. There are a thousand reasons, and they're all uniquely, perfectly you.`,
+      closing: "In love with every part of you"
+    },
+    {
+      trigger: "you need a hug 🤗",
+      icon: "🤗",
+      message: `Consider this letter a hug — a long, warm, tight one that says everything words sometimes can't. You are so loved. You are held. You matter more than you'll ever fully understand. I wish I could wrap my arms around you right now. Since I can't, hold this close and know that my love is always with you, wherever you are.`,
+      closing: "Sending the biggest hug"
+    },
+    {
+      trigger: "you're celebrating something 🎉",
+      icon: "🎉",
+      message: `YES!! Let's celebrate! Whatever this win is — big or small — it is worth celebrating because YOU made it happen. Your hard work, your talent, your perseverance. I am so proud of you. Pop the champagne, do a little dance, and soak it all in. You deserve every good thing that comes your way. Cheers to you!`,
+      closing: "So incredibly proud of you"
+    },
+    {
+      trigger: "you need adventure 🌍",
+      icon: "🌍",
+      message: `If wanderlust has taken over and you're craving something new — good. That curiosity is one of the things I love most about you. Let's plan our next adventure together. A new city, a long road trip, or even just a new restaurant. The world is big and I want to see all of it with you by my side.`,
+      closing: "Your forever travel partner"
+    },
+    {
+      trigger: "it's the end of the day 🌅",
+      icon: "🌅",
+      message: `You made it through another day — and I hope it was a good one. Whatever happened today, you showed up, you kept going, and that's everything. Rest now. Let the day go. You've earned every moment of peace tonight. Sweet dreams, my love. I'll be thinking of you as the stars come out.`,
+      closing: "Goodnight, always yours"
+    }];
+
+    const container = document.getElementById("cardContainer");
+
+    cards.forEach((card) => {
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <div class="icon">${card.icon}</div>
+        <div class="trigger">${card.trigger}</div>
+      `;
+      div.onclick = () => openPopup(card);
+      container.appendChild(div);
+    });
+
+    function openPopup(card) {
+      document.body.style.overflow = "hidden";
+      document.getElementById("popup").style.display = "flex";
+
+      document.getElementById("popupIcon").innerText = card.icon;
+      document.getElementById("popupTitle").innerText = "Open when " + card.trigger;
+      document.getElementById("popupMessage").innerText = card.message;
+      document.getElementById("popupClosing").innerText = card.closing;
+
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 }
+      });
+    }
+
+    function closePopup() {
+      document.body.style.overflow = "auto";
+      document.getElementById("popup").style.display = "none";
+    }
+  </script>
+
+</body>
+</html>
